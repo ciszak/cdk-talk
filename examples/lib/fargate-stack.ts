@@ -32,6 +32,7 @@ export class FargateStack extends Stack {
       vpc,
       domainName,
       domainZone: hostedZone,
+      certificate,
       taskImageOptions: {
         image: ContainerImage.fromAsset("./apps/randomizer"),
         containerPort: 8080,
