@@ -1,0 +1,264 @@
+import { Appear, Image, Notes, Split } from "mdx-deck";
+import {
+  CodeSurfer,
+  CodeSurferColumns,
+  Step,
+} from "code-surfer";
+import { github, vsDark } from "@code-surfer/themes";
+
+export const theme = {
+  ...github,
+  styles: {
+    inlineCode: {
+      bg: 'primary'
+    }
+  },
+} ;
+
+<Head>
+  <title>A gentle introduction to AWS CDK</title>
+</Head>
+
+# Hi 👋
+
+---
+
+# AWS CDK  
+CDK = Cloud Development Kit
+
+---
+
+# ✋
+
+---
+
+Cloud Infrastructure Management
+
+---
+
+import launch_instance_wizard from "./images/launch_instance_wizard.png";
+
+### \*clickety\* \*clack\*
+
+<Image src={launch_instance_wizard} size="contain" />
+
+---
+
+> No one should be forced  
+> to perform `recurring tasks`  
+> that are easy to `automate`.
+
+
+Human Rights (maybe some day)
+
+---
+
+import scriptDiagram from "./images/script_diag.png";
+
+<Image src={scriptDiagram} size="original" />
+
+---
+
+<CodeSurfer>
+
+```bash 30:34 file="./snippets/setup_instance.sh"
+```
+
+```diff 65:68
+```
+
+```diff title="./setup_instance.sh"
+```
+
+</CodeSurfer>
+
+---
+
+# `Imperative` code
+
+<ul>
+  <Appear>
+    <li>✅ automated</li>
+    <li>❌ what vs <strong>HOW</strong></li>
+    <li>❌ Changes are hard</li>
+    <li>❌ Lots of boilerplate code</li>
+  </Appear>
+</ul>
+
+😒
+
+---
+
+import cfDiagram from "./images/cf_diag.png";
+
+<Image src={cfDiagram} size="original" />
+
+---
+
+<CodeSurfer>
+
+```yaml 3:19
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  FrontendAutoScale:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    DependsOn:
+      - StorageAutoScale
+    Properties:
+      VPCZoneIdentifier: !Ref Subnets
+      DesiredCapacity: !Ref FrontendServers
+      HealthCheckType: 'ELB'
+      HealthCheckGracePeriod: '1200'
+      LaunchConfigurationName: !Ref FrontendLaunchConfig
+      LoadBalancerNames:
+        - !Ref FrontendLoadBalancer
+        - !Ref PagesLoadBalancer
+      MaxSize: '20'
+      MinSize: !Ref FrontendServers
+      TerminationPolicies:
+        - OldestInstance
+```
+
+```jinja
+{% macro tags(propagate_at_launch=False) %}
+  {%- set _tags = {
+  'Name': '!Ref AWS::StackName',
+  'ouid': '!Ref TagOuid',
+  'team': '!Ref TagTeam',
+  'email': '!Ref TagEmail',
+  'app': '!Ref TagApp',
+  'env': '!Ref TagEnv',
+  'uptime': '!Ref TagUptime'
+  }
+  %}
+      Tags:
+  {%- for t in _tags|dictsort %}
+        - Key: {{ t[0] }}
+          Value: {{ t[1] }}
+    {%- if propagate_at_launch %}
+          PropagateAtLaunch: true
+    {%- endif %}
+  {%- endfor %}
+{%- endmacro %}
+
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  FrontendAutoScale:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    DependsOn:
+      - StorageAutoScale
+    Properties:
+      VPCZoneIdentifier: !Ref Subnets
+      DesiredCapacity: !Ref FrontendServers
+      HealthCheckType: 'ELB'
+      HealthCheckGracePeriod: '1200'
+      LaunchConfigurationName: !Ref FrontendLaunchConfig
+      LoadBalancerNames:
+        - !Ref FrontendLoadBalancer
+        - !Ref PagesLoadBalancer
+      MaxSize: '20'
+      MinSize: !Ref FrontendServers
+      TerminationPolicies:
+        - OldestInstance
+{{- macros.tags(propagate_at_launch=True) }}
+```
+
+</CodeSurfer>
+
+---
+
+# `Declarative` template
+
+<ul>
+  <Appear>
+    <li>✅ automated</li>
+    <li>✅ <strong>WHAT</strong> vs how</li>
+    <li>✅ Changes are easy</li>
+    <li>❌ Verbose (1 to 1 relationship)</li>
+    <li>❌ Limited logic</li>
+  </Appear>
+</ul>
+
+🤨
+
+---
+
+import cdkDiagram from "./images/cdk_diag.png";
+
+<Image src={cdkDiagram} size="original" />
+
+---
+
+<CodeSurferColumns themes={[vsDark, github]}>
+
+<Step>
+
+```ts subtitle="CDK"
+import { Construct, Stack, StackProps } from "@aws-cdk/core";
+import * as s3 from "@aws-cdk/aws-s3";
+
+export class S3Stack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    const bucket = new s3.Bucket(this, "WebsiteBucket");
+  }
+}
+
+```
+
+```yaml subtitle="Output"
+Resources:
+  WebsiteBucket75C24D94:
+    Type: AWS::S3::Bucket
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: MyFirstStack/WebsiteBucket/Resource
+```
+
+</Step>
+
+<Step>
+
+```js subtitle="CDK"
+import { Construct, Stack, StackProps } from "@aws-cdk/core";
+import * as s3 from "@aws-cdk/aws-s3";
+
+export class S3Stack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    super(scope, id, props);
+
+    new Bucket(this, "WebsiteBucket", {
+      encryption: s3.BucketEncryption.S3_MANAGED,
+    });
+  }
+}
+
+```
+
+```yaml subtitle="Output"
+Resources:
+  WebsiteBucket75C24D94:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: MyFirstStack/WebsiteBucket/Resource
+```
+
+</Step>
+
+</CodeSurferColumns>
+
+---
+
+# Demo 🙃
+
+---
+

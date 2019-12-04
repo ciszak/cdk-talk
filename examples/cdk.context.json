@@ -1,0 +1,16 @@
+{
+  "@aws-cdk/core:enableStackNameDuplicates": "true",
+  "availability-zones:account=348440605270:region=eu-central-1": [
+    "eu-central-1a",
+    "eu-central-1b",
+    "eu-central-1c"
+  ],
+  "hosted-zone:account=348440605270:domainName=meetupdemo.ciszak.net.:region=eu-central-1": {
+    "Id": "/hostedzone/Z1S5N22W0L7DSB",
+    "Name": "meetupdemo.ciszak.net."
+  },
+  "hosted-zone:account=348440605270:domainName=meetupdemo.ciszak.net:region=eu-central-1": {
+    "Id": "/hostedzone/Z1S5N22W0L7DSB",
+    "Name": "meetupdemo.ciszak.net."
+  }
+}
