@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node bin/s3.ts",
+  "app": "npx ts-node bin/fargate.ts",
   "versionReporting": false,
   "config": {
     "account": "ciszak",

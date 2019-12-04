@@ -9,5 +9,4 @@ new FargateStack(app, "FargateStack", {
     account: "348440605270",
     region: "eu-central-1",
   },
-  domainName: "meetupdemo.ciszak.net",
 });
