@@ -3,6 +3,7 @@ import { ApplicationLoadBalancedFargateService } from "@aws-cdk/aws-ecs-patterns
 import { ContainerImage } from "@aws-cdk/aws-ecs";
 import { Vpc } from "@aws-cdk/aws-ec2";
 import { HostedZone } from "@aws-cdk/aws-route53";
+import { DnsValidatedCertificate } from "@aws-cdk/aws-certificatemanager";
 
 interface FargateProps extends StackProps {
   domainName: string;
@@ -20,6 +21,11 @@ export class FargateStack extends Stack {
 
     const hostedZone = HostedZone.fromLookup(this, "Domain", {
       domainName,
+    });
+
+    const certificate = new DnsValidatedCertificate(this, "Cert", {
+      domainName,
+      hostedZone,
     });
 
     new ApplicationLoadBalancedFargateService(this, "Service", {
